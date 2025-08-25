@@ -1,6 +1,7 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const axios = require('axios'); // for Agora REST API call
 const User = require('../models/User');
 
 const router = express.Router();
@@ -18,9 +19,35 @@ router.post('/register', async (req, res) => {
     const hash = await bcrypt.hash(password, salt);
 
     const user = await User.create({ name, email, passwordHash: hash });
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
+    // Agora Chat user creation
+    try {
+      await axios.post(
+        `https://a41.chat.agora.io/v1/users`,
+        { username: user._id.toString() },
+        {
+          headers: {
+            Authorization: `Bearer ${process.env.AGORA_ADMIN_TOKEN}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+    } catch (err) {
+      console.error('Agora user creation error:', err.response?.data || err.message);
+    }
+
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
     res.json({ user: { id: user._id, name: user.name, email: user.email }, token });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+router.get('/users', async (req, res) => {
+  try {
+    const users = await User.find({}, { passwordHash: 0 }); // exclude passwordHash
+    res.json(users);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Server error' });
