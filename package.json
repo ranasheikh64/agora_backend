@@ -4,16 +4,14 @@
   "description": "Agora RTC + RTM backend with MongoDB and JWT auth",
   "main": "server.js",
   "scripts": {
-    "dev": "nodemon server.js",
-    "start": "node server.js"
+    "dev": "node init && nodemon server.js",
+    "start": "node init && node server.js"
   },
   "engines": {
-  "node": "20.x"
-},
-
+    "node": "20.x"
+  },
   "dependencies": {
     "agora-access-token": "^2.0.4",
-
     "axios": "^1.11.0",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
@@ -23,7 +21,6 @@
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
     "mongoose": "^8.5.1"
-
   },
   "devDependencies": {
     "nodemon": "^3.1.10"
